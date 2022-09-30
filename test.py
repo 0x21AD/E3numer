@@ -1,8 +1,7 @@
 import requests
+import os
 import json
-import re
 import sys 
-from pythonping import ping
 import subprocess
 
 def Sectrails(Domain):
@@ -20,24 +19,30 @@ def Sectrails(Domain):
         print(f"{domain}.{sys.argv[1]}")
     print("\n")
     print("Printing the alive subdomains:\n")
-    for domain in data:
-        subdomain = domain + "." + sys.argv[1]
-        #print(subdomain)
-        try:
-            if(ping(subdomain, count=1)):
-                print(f"{subdomain}")
-                f=open("alive.txt" , "a")
-                f.write(subdomain)
-                f.write("\n")
-            else:
-                pass
-        except:
-            pass
-    f.close()
+    with open(os.devnull, 'w') as DEVNULL:
+        for domain in data:
+            subdomain = domain + "." + sys.argv[1]
+            #print(subdomain)
+            try:
+                subprocess.check_call(
+                ['ping', '-c', '4', subdomain],
+                stdout=DEVNULL,  # suppress output
+                stderr=DEVNULL
+                )
+                is_up = True
+                if is_up:
+                    print(subdomain)
+                    os.system(f"echo {subdomain} >> alive.txt")
+            except subprocess.CalledProcessError:
+                is_up = False
     print("\n")
     
-    print("Running Neucli Scanner on the alive ports.")
-    subprocess.call(["/usr/bin/nuclei"] , input="alive.txt")
+    print("Running Nuclei Scanner on the alive subdomains.\n")
+    try:
+        subprocess.run(["nuclei" , "-l" , "alive.txt" , "-o" , "nuclei.txt"])
+    except:
+        print("couldn't find nuclei in /usr/bin/nuclei")
+    #subprocess.check_call(["/usr/bin/nuclei"] , )
     
    # print("Printing the dead subdomains:\n")
    # print("they might be alive can later...miracles are real :)\n")
