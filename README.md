@@ -7,12 +7,12 @@
 ## Usage 
 ### python3 E3numer.py  OR python3 E3numer.py
 
-#### Tool is developed to automate the Recon and auditing process, It's been designed to be plug-in and play style , you need only need to specify the domain and it will: 1. take your domain and enumerate subdomains then filter for the live subdomains the tool 
-2.pipe the live subdomains to check what technologies they run and their versions by integrating with wappalyzer 
-3. It will also detect for WAF presence and it's type 
-4. it will run gobuster against each alive subdomain found.
-5. it will nmap scan again all live subdomains
-6. it will nuclei against every alive subdomain found
+#### Tool is developed to automate the Recon and auditing process, It's been designed to be plug-in and play style , you need only need to specify the domain and it will: #### 1. take your domain and enumerate subdomains then filter for the live subdomains the tool 
+#### 2.pipe the live subdomains to check what technologies they run and their versions by integrating with wappalyzer 
+#### 3. It will also detect for WAF presence and it's type 
+#### 4. it will run gobuster against each alive subdomain found.
+#### 5. it will nmap scan again all live subdomains
+#### 6. it will nuclei against every alive subdomain found
 
 ## Hint
 #### 1.you will find directories created named after each alive subdomain found, under each directory you will find nmap.txt , gobuster.txt , waf result ,..etc. you will also file result.html file that contains every information found belongs to that subdomain, and this applies to each directory(for each subdomain found), the tool will generate a nuclei output file.
