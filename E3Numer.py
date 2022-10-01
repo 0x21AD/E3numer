@@ -36,7 +36,10 @@ banner = """
 ($$$oo$$$$B_        b$$$$$$$$$$$$$$@c    Iq$$0^ $$$L -$$$U C$$o~ u$$$I r$$W~ *$$q"
 $$$$$BoZz?'         ~za@$$$$$$$$Bbf^     >k$$d! $$$a "0$$$88$$$/ O$$$} L$$8} #$$$i
 ^<;`.                  .`":;;;"`.        .^^^^.'^^^^  `,:'`^^^` ^^^^`  ^^^'. ^^^'
-                                                                                
+
+this tool reads your domain and pass it to this tool in purpose to automate recon
+Subdomain Enum -> live subdomains -> gobuster subdomains -> nmap subdomains -> nuclei subdomain    
+creators:       Zeyad Hassan (secYuri)    and     Ahmed Mamdouh (DeadDude) 
 """
 
 #----------------------------------------------Wapplayzer Integeration------------------------------------------------------
@@ -88,6 +91,7 @@ def SecTrails(Domain):
     for subdomain in data:
         print(f"{colorama.Fore.BLUE}\t{subdomain}.{Domain}" + RESET)
     print(ONGOING + "Printing the alive subdomains:" + RESET)
+    """
     with open(os.devnull, 'w') as DEVNULL:
         for domain in data:
             subdomain = domain + "." + Domain
@@ -104,6 +108,7 @@ def SecTrails(Domain):
                     os.system(f"echo https://{subdomain} >> alive.txt")
             except subprocess.CalledProcessError:
                 is_up = False
+                """
     print("\n")
     return data
     
@@ -139,7 +144,7 @@ def wafw00f_report(Domain):
     except:
         print("couldn't find wafw00f on /bin/")
 
-#----------------------------------------------gobuster Integeration------------------------------------------------------
+#----------------------------------------------dirsearch Integeration------------------------------------------------------
 
 def dirsearch(Domain):
     print(PHASE + "Directory Bruteforce Phase" + RESET)
@@ -148,6 +153,12 @@ def dirsearch(Domain):
     except:
         print("Couldn't conduct directory search, make sure you have gobuster and the common wordlist at /usr/share/wordlists/dirb/common.txt ")
 
+
+def create_Report(subdomain):
+    f= open(f"./{subdomain}/index.html", 'a')
+    content = "<html><head><title>Recon Report</title><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.cs' rel='stylesheet'><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.j'></script><style>section{padding: 20px;}\niframe{color: green;background-color: white;}</style></head><body class='bg-dark text-bg-primary'><section class='row bg-dark text-bg-primary'><h1 class='center'>Report</h1><div class='col' id='nmap'><h1>Port Scan</h1><p class='container'><iframe style='color: green;background-color: white;' src='./NmapReport.txt' width='95%' height='800'></iframe></p></div><div class='col' id='dir'><h1>Busted Directories</h1><p class='container'><iframe style='color: green;background-color: white;' src='./Directories.txt' width='95%' height='800'></iframe></p></div><div class='col' id='waf'><h1>Detected WAF</h1><p class='container'><iframe style='color: green;background-color: white;' src='./WAF_Report.txt' width='95%' height='800'></iframe></p></div></section></body></html>"
+    f.write(content)
+    f.close()
     
 if __name__ == "__main__":
     def main():
@@ -161,6 +172,7 @@ if __name__ == "__main__":
                 wapplayzer_report(sub + "." + sys.argv[1])
                 Nmap_Report(sub + "." + sys.argv[1])
                 dirsearch(sub + "." + sys.argv[1])
+                create_Report(sub + "." + sys.argv[1])
             Nuclei_Report()
 
         except:
@@ -173,6 +185,7 @@ if __name__ == "__main__":
                 wapplayzer_report(sub + "." + apexDomain)
                 Nmap_Report(sub + "." + apexDomain)
                 dirsearch(sub + "." + apexDomain)
+                create_Report(sub + "." + apexDomain)
             Nuclei_Report()            
     main()
 
