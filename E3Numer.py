@@ -8,8 +8,8 @@ import colorama
 apexDomain=""
 
 # constants
-wapplayzer_api_key = "ddbOUg8jMv7WC2wbhuEyn4KnZsuXLfNI2QbZsndu"
-securityTrails_api_key =  "1QIJWVHfK0UtBOiDuINEOoOOEkFXXXD1"
+wapplayzer_api_key = "sMSUWa5StM9OWbeDWsWj4259lZ1rTUDW5gciwdAn"
+securityTrails_api_key =  "nEIBWK6dvQLYpIKPLj9uVonZZ2wb02HO"
 
 ERROR = colorama.Back.RED + colorama.Fore.BLACK
 ONGOING = colorama.Fore.YELLOW
@@ -39,11 +39,9 @@ $$$$$BoZz?'         ~za@$$$$$$$$Bbf^     >k$$d! $$$a "0$$$88$$$/ O$$$} L$$8} #$$
                                                                                 
 """
 
+#----------------------------------------------Wapplayzer Integeration------------------------------------------------------
 
-
-
-def main(Domain):
-    #----------------------------------------------Wapplayzer------------------------------------------------------
+def wapplayzer_report(Domain):
     print(PHASE + "Technology Detection Phase" + RESET)
     try:
         data = requests.get( "https://api.wappalyzer.com/v2/lookup/?urls=https://" + Domain , headers ={"x-api-key": wapplayzer_api_key})
@@ -60,10 +58,10 @@ def main(Domain):
                 except: versions.append('unidentified')
         except requests.RequestException:
             print(ERROR + "[!] WAPPALYZER REQUEST ERROR " + RESET)
-        except requests.JSONDecodeError:
+        except json.JSONDecodeError:
             print(ERROR + "[!] WAPPALYZER RESPONSE ERROR " + RESET)
         except:
-            print(ERROR + "UNKNOWN ERROR" + RESET)
+            print(ERROR + data.text + RESET)
 
         print("----------------------------------------------------" + Domain +'----------------------------------------------------')
         for i in range(len(technologies)-1):
@@ -71,8 +69,11 @@ def main(Domain):
             result.append([technologies[i],versions[i]])
     except:
         print(ERROR + "ERROR: COULND NOT ESTABLISH CONNECTION TO WAPPALYZER" + RESET)
-    
-    #----------------------------------------------SecTrails Integeration-------------------------------------------------------
+
+
+#----------------------------------------------SecTrails Integeration-------------------------------------------------------
+
+def SecTrails(Domain):
     print(PHASE + " Subdomain Enumeration Phase " + RESET)
     url = "https://api.securitytrails.com/v1/domain/"+Domain+"/subdomains?children_only=false&include_inactive=true"
 
@@ -104,32 +105,75 @@ def main(Domain):
             except subprocess.CalledProcessError:
                 is_up = False
     print("\n")
+    return data
     
-    #----------------------------------------------Nuclei Integeration-------------------------------------------------------
+
+#----------------------------------------------Nuclei Integeration-------------------------------------------------------
+
+def Nuclei_Report():
     print(PHASE +"Vulnerability Scanning Phase" + RESET + "\n")
     try:
-        subprocess.run(["nuclei" , "-l" , "alive.txt" , "-s" , "low,medium,high,critical" , "-o" , "nuclei.txt"]) 
+        subprocess.run(["nuclei" , "-l" , "alive.txt" , "-s" , "low,medium,high,critical" , "-o" , "./NucleiReport.txt"]) 
     except:
         print(ERROR + "couldn't find nuclei in" + colorama.Fore.CYAN + " /usr/bin/nuclei" + colorama.Style.RESET_ALL)
+
+#----------------------------------------------Nmap automation-------------------------------------------------------
+
+def Nmap_Report(Domain):
+    try:
+        print(PHASE + "Service Scanning Phase"+ RESET)
+        print(f"{ONGOING}[+] Starting Nmap for {colorama.Fore.BLUE} {Domain} {colorama.Fore.MAGENTA}\n")
+        os.system(f"nmap -sV -T4 {Domain} -o ./{Domain}/NmapReport.txt")
+        print(RESET)
+    except:
+        print(ERROR + "Nmap could not run"+ RESET)
+
+#----------------------------------------------wafw00f Integeration------------------------------------------------------
+
+def wafw00f_report(Domain):
+    print(PHASE + "WAF Detection Phase" + RESET)
+    try:
+        os.system(f"wafw00f {Domain} -o ./{Domain}/WAF_Report.txt | grep 'is behind'")
+        print('\n')
+       # subprocess.check_call(["./bin/wafw00f", {Domain}, "-o", f"./{Domain}/WAF_Report.txt"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except:
+        print("couldn't find wafw00f on /bin/")
+
+#----------------------------------------------gobuster Integeration------------------------------------------------------
+
+def dirsearch(Domain):
+    print(PHASE + "Directory Bruteforce Phase" + RESET)
+    try:
+        os.system(f"gobuster dir -q --url https://{Domain} --random-agent --wordlist /usr/share/wordlists/dirb/common.txt --output='./{Domain}/Directories.txt'")
+    except:
+        print("Couldn't conduct directory search, make sure you have gobuster and the common wordlist at /usr/share/wordlists/dirb/common.txt ")
+
     
-    #----------------------------------------------Nmap automation-------------------------------------------------------
-    print(PHASE + "Service Scanning Phase")
-    f = open("alive.txt" ,"r")
-    lines=f.read().split("\n")
-    for line in lines:
-        print(f"{ONGOING}[+] Starting Nmap for {colorama.Fore.BLUE} {line} {RESET}\n")
-        newline = line.replace("https://","")
-        os.system(f"nmap -A -T4 -Pn {newline} -o {newline}.nmap") 
-    f.close()
+if __name__ == "__main__":
+    def main():
+        apexDomain = ""
+        print(colorama.Fore.LIGHTGREEN_EX + banner + RESET)
+        try:
+            subdomains = SecTrails(sys.argv[1])
+            for sub in subdomains:
+                os.system("mkdir " + "./" + sub + "." + sys.argv[1])
+                wafw00f_report(sub + "." +sys.argv[1])
+                wapplayzer_report(sub + "." + sys.argv[1])
+                Nmap_Report(sub + "." + sys.argv[1])
+                dirsearch(sub + "." + sys.argv[1])
+            Nuclei_Report()
 
-print(colorama.Fore.LIGHTGREEN_EX + banner + RESET)
+        except:
+            while apexDomain == "":
+                apexDomain= input(INPUT + "Enter Apex Domain: ") 
+            subdomains = SecTrails(apexDomain)
+            for sub in subdomains:
+                os.system("mkdir " + "./" + sub + "." + apexDomain)    # create subdomain file
+                wafw00f_report(sub + "." + apexDomain)      
+                wapplayzer_report(sub + "." + apexDomain)
+                Nmap_Report(sub + "." + apexDomain)
+                dirsearch(sub + "." + apexDomain)
+            Nuclei_Report()            
+    main()
 
-try:
-    main(sys.argv[1])
-    quit()
-except IndexError:
-    while apexDomain=="":
-        apexDomain= input(INPUT + "Enter Apex Domain: ") ##############
-    main(apexDomain)
-    quit()
-except: quit()
+# run plz
