@@ -7,7 +7,8 @@
 ## Usage 
 ### python3 E3numer.py  OR python3 E3numer.py
 
-#### Tool is developed to automate the Recon and auditing process, It's been designed to be plug-in and play style , you need only need to specify the domain and it will: #### 1. take your domain and enumerate subdomains then filter for the live subdomains the tool 
+#### Tool is developed to automate the Recon and auditing process, It's been designed to be plug-in and play style , you need only need to specify the domain and it will:
+#### 1. take your domain and enumerate subdomains then filter for the live subdomains the tool 
 #### 2.pipe the live subdomains to check what technologies they run and their versions by integrating with wappalyzer 
 #### 3. It will also detect for WAF presence and it's type 
 #### 4. it will run gobuster against each alive subdomain found.
