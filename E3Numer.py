@@ -159,14 +159,14 @@ def dirsearch(Domain):
 # creates an html file that read all the outputs to be view from place
 def create_Report(subdomain):
     f= open(f"./{subdomain}/index.html", 'a')
-    content = "<html><head><title>Recon Report</title><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.cs' rel='stylesheet'><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.j'></script><style>section{padding: 20px;}\niframe{color: green;background-color: white;}</style></head><body class='bg-dark text-bg-primary'><section class='row bg-dark text-bg-primary'><h1 class='center'>Report</h1><div class='col' id='nmap'><h1>Port Scan</h1><p class='container'><iframe style='color: green;background-color: white;' src='./NmapReport.txt' width='95%' height='800'></iframe></p></div><div class='col' id='dir'><h1>Busted Directories</h1><p class='container'><iframe style='color: green;background-color: white;' src='./Directories.txt' width='95%' height='800'></iframe></p></div><div class='col' id='waf'><h1>Detected WAF</h1><p class='container'><iframe style='color: green;background-color: white;' src='./WAF_Report.txt' width='95%' height='800'></iframe></p></div></section></body></html>"
+    content = "<html><head><title>Recon Report</title><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css' rel='stylesheet'><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js'></script><style>section{padding: 20px;}\niframe{color: green;background-color: white;}</style></head><body class='bg-dark text-bg-primary'><section class='row bg-dark text-bg-primary'><h1 class='center'>Report</h1><div class='col' id='nmap'><h1>Port Scan</h1><p class='container'><iframe style='color: green;background-color: white;' src='./NmapReport.txt' width='95%' height='800'></iframe></p></div><div class='col' id='dir'><h1>Busted Directories</h1><p class='container'><iframe style='color: green;background-color: white;' src='./Directories.txt' width='95%' height='800'></iframe></p></div><div class='col' id='waf'><h1>Detected WAF</h1><p class='container'><iframe style='color: green;background-color: white;' src='./WAF_Report.txt' width='95%' height='800'></iframe></p></div></section></body></html>"
     f.write(content)
     f.close()
     
 if __name__ == "__main__":
     def main():
         apexDomain = ""
-        print(colorama.Fore.LIGHTGREEN_EX + banner + RESET)
+        print(colorama.Fore.LIGHTGREEN_EX + banner + RESET) # print banner
         try:
             subdomains = SecTrails(sys.argv[1])
             for sub in subdomains:
@@ -183,7 +183,7 @@ if __name__ == "__main__":
                 apexDomain= input(INPUT + "Enter Apex Domain: ") 
             subdomains = SecTrails(apexDomain)
             for sub in subdomains:
-                os.system("mkdir " + "./" + sub + "." + apexDomain)    # create subdomain file
+                os.system("mkdir " + "./" + sub + "." + apexDomain)    # create subdomain folder
                 wafw00f_report(sub + "." + apexDomain)      
                 wapplayzer_report(sub + "." + apexDomain)
                 Nmap_Report(sub + "." + apexDomain)
