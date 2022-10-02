@@ -14,6 +14,9 @@
 #### 5. it will nmap scan again all live subdomains
 #### 6. it will nuclei against every alive subdomain found
 
+## Api-Key
+The tool is using security trails and wappalyzer non-commercial api-keys, we strongly recommend you to register account on both and use your own api-keys to avoid quota errors.
+
 ## Hint
 #### 1.you will find directories created named after each alive subdomain found, under each directory you will find nmap.txt , gobuster.txt , waf result ,..etc. you will also file result.html file that contains every information found belongs to that subdomain, and this applies to each directory(for each subdomain found), the tool will generate a nuclei output file.
 #### 2.you might see some errors popping off to the terminal while the tool is running as the tool might try to nmap a directory which doesn't respond or try a to run gobuster against random configured subdomain as the tool try to sequeeze for every single piece of info, however the tool will continue running until it finishes.
@@ -21,3 +24,4 @@
 ### Creators
 https://www.linkedin.com/in/ahmed-mamdouh-b563081b6/ 
 https://www.linkedin.com/in/zeyad-hassan-a973441bb/
+
