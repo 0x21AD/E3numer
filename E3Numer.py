@@ -5,12 +5,12 @@ import sys
 import subprocess
 import colorama
 
-apexDomain=""
 
-# constants
+# API keys, add your api keys here
 wapplayzer_api_key = "sMSUWa5StM9OWbeDWsWj4259lZ1rTUDW5gciwdAn"
 securityTrails_api_key =  "nEIBWK6dvQLYpIKPLj9uVonZZ2wb02HO"
 
+# color templates
 ERROR = colorama.Back.RED + colorama.Fore.BLACK
 ONGOING = colorama.Fore.YELLOW
 DONE = colorama.Fore.GREEN + colorama.Back.LIGHTBLACK_EX
@@ -43,7 +43,7 @@ creators:       Zeyad Hassan (secYuri)    and     Ahmed Mamdouh (DeadDude)
 """
 
 #----------------------------------------------Wapplayzer Integeration------------------------------------------------------
-
+# this functions calls the API for the provided domain in the parameters, reads the json and print the results in a formated manner
 def wapplayzer_report(Domain):
     print(PHASE + "Technology Detection Phase" + RESET)
     try:
@@ -75,7 +75,10 @@ def wapplayzer_report(Domain):
 
 
 #----------------------------------------------SecTrails Integeration-------------------------------------------------------
-
+# this function calls the security trails api for subdomain list of the apex domain
+# read the json respones
+# write them in alive.txt
+# returns a list of the subdomains
 def SecTrails(Domain):
     print(PHASE + " Subdomain Enumeration Phase " + RESET)
     url = "https://api.securitytrails.com/v1/domain/"+Domain+"/subdomains?children_only=false&include_inactive=true"
@@ -114,7 +117,7 @@ def SecTrails(Domain):
     
 
 #----------------------------------------------Nuclei Integeration-------------------------------------------------------
-
+# runs Nuclei for the alive subdomains that is saved in alive.txt
 def Nuclei_Report():
     print(PHASE +"Vulnerability Scanning Phase" + RESET + "\n")
     try:
@@ -123,7 +126,7 @@ def Nuclei_Report():
         print(ERROR + "couldn't find nuclei in" + colorama.Fore.CYAN + " /usr/bin/nuclei" + colorama.Style.RESET_ALL)
 
 #----------------------------------------------Nmap automation-------------------------------------------------------
-
+# runs nmap to scan the open ports of the provided domain and save the results in a file
 def Nmap_Report(Domain):
     try:
         print(PHASE + "Service Scanning Phase"+ RESET)
@@ -134,7 +137,7 @@ def Nmap_Report(Domain):
         print(ERROR + "Nmap could not run"+ RESET)
 
 #----------------------------------------------wafw00f Integeration------------------------------------------------------
-
+# checks if there is web applicatoin firewall (WAF)
 def wafw00f_report(Domain):
     print(PHASE + "WAF Detection Phase" + RESET)
     try:
@@ -144,8 +147,8 @@ def wafw00f_report(Domain):
     except:
         print("couldn't find wafw00f on /bin/")
 
-#----------------------------------------------dirsearch Integeration------------------------------------------------------
-
+#----------------------------------------------gobuster Integeration------------------------------------------------------
+# fuzz the directories of the provieded domain
 def dirsearch(Domain):
     print(PHASE + "Directory Bruteforce Phase" + RESET)
     try:
@@ -153,7 +156,7 @@ def dirsearch(Domain):
     except:
         print("Couldn't conduct directory search, make sure you have gobuster and the common wordlist at /usr/share/wordlists/dirb/common.txt ")
 
-
+# creates an html file that read all the outputs to be view from place
 def create_Report(subdomain):
     f= open(f"./{subdomain}/index.html", 'a')
     content = "<html><head><title>Recon Report</title><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.cs' rel='stylesheet'><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.j'></script><style>section{padding: 20px;}\niframe{color: green;background-color: white;}</style></head><body class='bg-dark text-bg-primary'><section class='row bg-dark text-bg-primary'><h1 class='center'>Report</h1><div class='col' id='nmap'><h1>Port Scan</h1><p class='container'><iframe style='color: green;background-color: white;' src='./NmapReport.txt' width='95%' height='800'></iframe></p></div><div class='col' id='dir'><h1>Busted Directories</h1><p class='container'><iframe style='color: green;background-color: white;' src='./Directories.txt' width='95%' height='800'></iframe></p></div><div class='col' id='waf'><h1>Detected WAF</h1><p class='container'><iframe style='color: green;background-color: white;' src='./WAF_Report.txt' width='95%' height='800'></iframe></p></div></section></body></html>"
