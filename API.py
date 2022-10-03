@@ -1,2 +1,2 @@
-wapplayzer_api_key = "sMSUWa5StM9OWbeDWsWj4259lZ1rTUDW5gciwdAn"
-securityTrails_api_key = "azkwiGabjO5lx50k10z9ia95U20yoCh6"
+wapplayzer_api_key = "" # add your api key
+securityTrails_api_key = "" # add your api key
