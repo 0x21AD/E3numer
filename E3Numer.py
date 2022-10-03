@@ -9,6 +9,13 @@ from colorama import Fore, Style, Back
 # API keys, add your api keysin API.py file
 from API import wapplayzer_api_key, securityTrails_api_key
 
+if not wapplayzer_api_key or not securityTrails_api_key: # missing API key
+    print(f'{Back.RED}{Fore.BLACK} Missing API keys {Style.RESET_ALL}')
+    print(f'{Fore.CYAN}add your API keys in API.py')
+    print(f'Get Securitytrails API key: https://securitytrails.com/app/account/credentials')
+    print(f'Get Wappalyzer API key: https://www.wappalyzer.com/api')
+    exit(0)
+
 # color templates
 ERROR = Back.RED + Fore.BLACK
 ONGOING = Fore.YELLOW
