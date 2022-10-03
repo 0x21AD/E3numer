@@ -1,0 +1,8 @@
+# json # is a built-in Python modules, we don't need to install it 
+# pip3 freeze > requirements.txt 
+certifi==2022.9.24
+charset-normalizer==2.1.1
+colorama==0.4.5
+idna==3.4
+requests==2.28.1
+urllib3==1.26.12
