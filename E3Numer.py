@@ -1,195 +1,304 @@
 import requests
 import os
 import json
-import sys 
+import sys
 import subprocess
 import colorama
+import validators
 
+apexDomain=""
 
-# API keys, add your api keys here
-wapplayzer_api_key = "sMSUWa5StM9OWbeDWsWj4259lZ1rTUDW5gciwdAn"
-securityTrails_api_key =  "nEIBWK6dvQLYpIKPLj9uVonZZ2wb02HO"
+# API keys, add your api keys her
+wapplayzer_api_key = "sMSUWa5StM9OWbeDWsWj4259lZ1rTUDW5gciwdAn" # REMOVE BEFORE PUBLISHING
+securityTrails_api_key =  "PjZjxGoqfRo1zqL6drUqaj3bESlEQUdg"	# REMOVE BEFORE PUBLISHING
 
 # color templates
-ERROR = colorama.Back.RED + colorama.Fore.BLACK
-ONGOING = colorama.Fore.YELLOW
-DONE = colorama.Fore.GREEN + colorama.Back.LIGHTBLACK_EX
-INPUT = colorama.Fore.LIGHTMAGENTA_EX
-PHASE = colorama.Back.BLUE + colorama.Fore.WHITE
-RESET = colorama.Style.RESET_ALL
-IMPORTANT = colorama.Fore.CYAN
+ERROR     = colorama.Fore.BLACK  + colorama.Back.RED
+ONGOING   = colorama.Fore.YELLOW + colorama.Back.BLACK
+DONE      = colorama.Fore.GREEN  + colorama.Back.BLACK
+INPUT     = colorama.Fore.WHITE  + colorama.Back.BLACK
+PHASE     = colorama.Fore.BLUE   + colorama.Back.BLACK
+IMPORTANT = colorama.Fore.CYAN   + colorama.Back.BLACK
+RESET     = colorama.Style.RESET_ALL
 
 
-banner = """                                                                                
-                     ($$$$$$$$$$$$$$$$Z^                                        
-                    ^0$$$$$$$$$$$$$$$w;                                         
-                    ~$$$$$$$$$$$$$$$#^                                          
-                    `.      .t%$$$$b`                                           
-         :}fpbka*q<         )B$$$$Q^                                            
-      }8$$$$&#oox'         f$$$$$qI                                             
-     I0B$8n^             .nB$$$$$$*z^                                           
-     [M$8}               IrL$$$$$$$$W_                                          
-    |$$$$$$$%x^              :Q@$$$$$pl  ,+++!.</}:i +++~" +++> ++++'"{)<. :)(>. 
-  .u$$$hx[~l'                 ~W$$$$$a~  ld$$ad@$$B( ]$$$C C$$$| Y$$$pB$$$*L%$$$C^
- 'U@$b!              '^      .vB$$$$$a<  Iq$$O" $$$L -$$$t J$$a~ u$$$l^Q$$W~,#$$w"
-.xB$W+              "w$bJ{+}Yo$$$$$$@U'  Iq$$0^ $$$L -$$$[ J$$a~ u$$$; r$$W~ *$$w"
-($$$oo$$$$B_        b$$$$$$$$$$$$$$@c    Iq$$0^ $$$L -$$$U C$$o~ u$$$I r$$W~ *$$q"
-$$$$$BoZz?'         ~za@$$$$$$$$Bbf^     >k$$d! $$$a "0$$$88$$$/ O$$$} L$$8} #$$$i
-^<;`.                  .`":;;;"`.        .^^^^.'^^^^  `,:'`^^^` ^^^^`  ^^^'. ^^^'
+banner = """
+             :=+**####################*+=:             .-*%@@@@@%%%@@@@@%*=.                    .+%@@@@@#=
+           +@@@%#**++++++++++++++++++*#%@@@*.        =%@@%*-:         .-+%@@%=                 -@@@=::-*@@@.
+         :@@%-    ...................    :#@@:    .+@@#=.  .-+*#####*+=:  .=%@@+               @@@      -@@#
+         %@@  :#@@@@@@@@@@@@@@@@@@@@@@@#-  #@@   =@@#:  :*@@@@@@@@@@@@@@@*:  -%@@-            .@@*       @@%
+        :@@+  @@@@@@@@@@@@@@@@@@@@@@@@@@%  +@@: +@@+  =%@@@@@@@@@@@@@@@@@@@%-  *@@+           .@@*       @@%
+        -@@= .@@@@@@@@@@@@@@@@@@@@@@@@%*:  %@@ .@@+  *@@@@@@@@#+=--=+#@@@@@@@*  =@@=          .@@*       @@%
+        -@@- .@@@@@@%                    -%@@: =@@  :@@@@@@@+.   ::.   =@@@@@@+  *@@          .@@*       @@%
+        -@@- .@@@@@@#  -++++===----==+*%@@@+.  -@@:  %@@@@+.  -#@@@@@+  :@@@@@@  :@@-         .##=       ##+
+        -@@- .@@@@@@#  *@@###########**+-.      %@@-  :=-   =@@%-. =@@*  #@@@@@:  @@+          -------------  ..        ..
+        -@@- .@@@@@@#  *@@+====++==-:.           *@@%+---=*@@%-   .*@@+  #@@@@@.  @@=          @@@@@@@@@@@@@.-@@+      .@@#
+        -@@- .@@@@@@#  =###******##%@@@#-          -*%@@@@#+:   =#@@%-  -@@@@@#  =@@.          @@@@@@@@@@@@@.-@@+      .@@#
+        -@@- .@@@@@@#                :*@@#                    =@@@+.  :*@@@@@%. .@@*           @@@@@@@@@@@@@.-@@+      .@@#
+        -@@- .@@@@@@@%%%%%%%%%%%%%%#+  =@@=                  :@@+  :*@@@@@@@*  :@@%            @@@@@@@@@@@@@.-@@+      .@@#
+        -@@- .@@@@@@@@@@@@@@@@@@@@@@@- .@@+                  -@@-  +@@@@@@@@=  -@@%.           @@@@@@@@@@@@@.-@@+      .@@#
+        -@@- .@@@@@@@##############*=  +@@=                   #@@+.  -#@@@@@@%: .%@%.          @@@@@@@@@@@@@..@@%.     +@@+
+        -@@- .@@@@@@#               .-#@@*         .=*###*+-   -#@@#=  .#@@@@@@. .@@*          @@@@@@@@@@@@@. :%@@*==+%@@*
+        -@@- .@@@@@@#  *@%%%#####%@@@@%*:        =%@@#*++#@@@+    +@@%.  %@@@@@#  +@@          @@@@@@@@@@@@@.   =#@@@@%+:
+        -@@- .@@@@@@#  *@@+=======--:           #@@+.  .   =@@%-   .@@#  +@@@@@%  =@@:         .............
+        -@@- .@@@@@@#  *@@%###%%%%%%%##+=:     +@@:  *@@@+   +@@#-:+@@+  #@@@@@%  =@@.         -%@@@@@@@@@@@..@@@@@@@@@@@@@.   -*##+: :+*#*-
+        -@@- .@@@@@@#  -+===--------=+*%@@@#:  #@%  =@@@@@@=  .+@@@@%-  =@@@@@@=  #@@            +@@@@@@@@@@..@@@@@@@@@@@@@. .%@@##@@#@@##@@%:
+        -@@- .@@@@@@%.................   -#@@= *@@  :@@@@@@@%=   ..   -#@@@@@@%  :@@=             :%@@@@@@@@..@@@@@@@@@@@@@. %@#    %@%    %@#
+        -@@= .@@@@@@@@@@@@@@@@@@@@@@@@@%-  %@@ :@@*  +@@@@@@@@@%*++*#@@@@@@@@#  .@@#                +@@@@@@@..@@@@@@@@@@@@@. @@+    *@*    *@%
+        .@@+  @@@@@@@@@@@@@@@@@@@@@@@@@@%  +@@: =@@*  :#@@@@@@@@@@@@@@@@@@@@=  =@@#                  .#@@@@@..@@@@@@@@@@@@@. @@+    *@+    +@%
+         %@@. :*%@@@@@@@@@@@@@@@@@@@@@@#:  #@@   -@@@=   =#@@@@@@@@@@@@@@#-  :#@@*                     =@@@@..@@@@@@@@@@@@@. @@+    *@+    +@%
+         .%@@=.                          :#@@:     =%@@*-   :-+**###*+=:  .-#@@*.                       :#@@..@@@@@@@@@@@@@. @@+    *@+    +@%
+           =%@@@%##******************##%@@%+         :*@@@#+=:..    ..:=*%@@%+.                           -%..@@@@@@@@@@@@@. @@+    *@+    +@%
+              :=++********************+=-.              .=*%@@@@@@@@@@@@%*=.                                  =============  :-.    .-.    .-:
 
-this tool reads your domain and pass it to this tool in purpose to automate recon
-Subdomain Enum -> live subdomains -> gobuster subdomains -> nmap subdomains -> nuclei subdomain    
-creators:       Zeyad Hassan (secYuri)    and     Ahmed Mamdouh (DeadDude) 
 """
+statment = IMPORTANT + """
+this tool reads your domain and pass it to these tools in purpose to automate recon
+creators: 	Zeyad Hassan (secYuri), Ahmed Mamdouh (DeadDude)
+""" + RESET
+
+
+
 
 #----------------------------------------------Wapplayzer Integeration------------------------------------------------------
 # this functions calls the API for the provided domain in the parameters, reads the json and print the results in a formated manner
 def wapplayzer_report(Domain):
-    print(PHASE + "Technology Detection Phase" + RESET)
-    try:
-        data = requests.get( "https://api.wappalyzer.com/v2/lookup/?urls=https://" + Domain , headers ={"x-api-key": wapplayzer_api_key})
+	print(PHASE + "Technology Detection Phase " + ONGOING  + " " + Domain + RESET)
+	try:
+		data = requests.get( "https://api.wappalyzer.com/v2/lookup/?urls=https://" + Domain , headers ={"x-api-key": wapplayzer_api_key})
         # format json and present results
-        jsoned_data = json.loads(data.text)
-        technologies = []
-        versions = []
-        result = []
-        try:
-            for one in jsoned_data[0]['technologies']:
-                technologies.append(one['name'])
-                try:
-                    versions.append(one['versions'][0])
-                except: versions.append('unidentified')
-        except requests.RequestException:
-            print(ERROR + "[!] WAPPALYZER REQUEST ERROR " + RESET)
-        except json.JSONDecodeError:
-            print(ERROR + "[!] WAPPALYZER RESPONSE ERROR " + RESET)
-        except:
-            print(ERROR + data.text + RESET)
+		jsoned_data = json.loads(data.text)
+		technologies = []
+		versions = []
+		result = []
+		# list extracted data in arrays
+		try:
+			for one in jsoned_data[0]['technologies']:
+				technologies.append(one['name'])
+				try: versions.append(one['versions'][0])
+				except IndexError: versions.append('unidentified')
+		
+		except requests.RequestException:
+			print(ERROR + "[!] WAPPALYZER REQUEST ERROR " + RESET)
+		
+		except json.JSONDecodeError:
+			print(ERROR + "[!] WAPPALYZER RESPONSE ERROR " + RESET)
+		
+		except:
+			print(ERROR + data.text + RESET)
+		# print results to the user
+		for i in range(len(technologies)-1):
+			sys.stdout.write("\t" + IMPORTANT + technologies[i] + "\t" + ONGOING + versions[i] + RESET + "\n")
+			result.append([technologies[i],versions[i]])
+	
+	except:
+		print(ERROR + "ERROR: COULND NOT ESTABLISH PROPER CONNECTION WITH WAPPALYZER" + RESET)
 
-        print("----------------------------------------------------" + Domain +'----------------------------------------------------')
-        for i in range(len(technologies)-1):
-            sys.stdout.write("\t" + IMPORTANT + technologies[i] + "\t" + ONGOING + versions[i] + RESET + "\n")
-            result.append([technologies[i],versions[i]])
-    except:
-        print(ERROR + "ERROR: COULND NOT ESTABLISH CONNECTION TO WAPPALYZER" + RESET)
+
 
 
 #----------------------------------------------SecTrails Integeration-------------------------------------------------------
 # this function calls the security trails api for subdomain list of the apex domain
-# read the json respones
-# write them in alive.txt
-# returns a list of the subdomains
 def SecTrails(Domain):
-    print(PHASE + " Subdomain Enumeration Phase " + RESET)
-    url = "https://api.securitytrails.com/v1/domain/"+Domain+"/subdomains?children_only=false&include_inactive=true"
+	print(PHASE + "Subdomain Enumeration Phase " + RESET)
+	# creating the request
+	url = "https://api.securitytrails.com/v1/domain/"+Domain+"/subdomains?children_only=false&include_inactive=true"
+	headers = {
+		"accept": "application/json",
+		"APIKEY": securityTrails_api_key
+	}
+	# calling the API
+	try:
+		response = requests.get(url, headers=headers)
+		
+		# formating the requested data
+		jsondata=json.loads(response.text)
+		data = jsondata["subdomains"]
+		print(ONGOING + "[~] Listing subdomains" + RESET)
 
-    headers = {
-        "accept": "application/json",
-        "APIKEY": securityTrails_api_key
-    }
-    response = requests.get(url, headers=headers)
-    jsondata=json.loads(response.text)
-    data = jsondata["subdomains"]
-    print(ONGOING + "Printing all subdomains" + RESET)
-    for subdomain in data:
-        print(f"{colorama.Fore.BLUE}\t{subdomain}.{Domain}" + RESET)
-    print(ONGOING + "Printing the alive subdomains:" + RESET)
-    """
-    with open(os.devnull, 'w') as DEVNULL:
-        for domain in data:
-            subdomain = domain + "." + Domain
-            #print(subdomain)
-            try:
-                subprocess.check_call(
-                ['ping', '-c', '4', subdomain],
-                stdout=DEVNULL,  # suppress output
-                stderr=DEVNULL
-                )
-                is_up = True
-                if is_up:
-                    print( IMPORTANT + '\t' + subdomain)
-                    os.system(f"echo https://{subdomain} >> alive.txt")
-            except subprocess.CalledProcessError:
-                is_up = False
-                """
-    print("\n")
-    return data
-    
+		for subdomain in data:
+			print(f"\t{subdomain}.{Domain}" + RESET)
+		print(ONGOING + "\n[~] Listing live subdomains:" + RESET)
+
+		with open(os.devnull, 'w') as DEVNULL:
+			for sub in data:
+				subdomain = sub + "." + Domain
+				is_up = False	# default status
+				
+				try:	
+					subprocess.check_call(
+					['ping', '-c', '2', subdomain],
+					stdout=DEVNULL,
+					stderr=DEVNULL
+					)
+					is_up = True
+					if is_up:
+						print( DONE + '\t' + subdomain)
+						os.system(f"echo https://{subdomain} >> alive.txt")
+				
+				except subprocess.CalledProcessError:
+					is_up = False
+	
+		print(RESET+"\n")
+		return data
+
+	except requests.RequestException:
+		print(ERROR + "[!] failed to establish connection with securtiy trails API")
+
+	except json.JSONDecodeError:
+		print(ERROR + "[!] could not read response properly")
+
+	except:
+		print(ERROR + "[!] " + response.text)
+
+	print("\n")
+
+
+
 
 #----------------------------------------------Nuclei Integeration-------------------------------------------------------
 # runs Nuclei for the alive subdomains that is saved in alive.txt
 def Nuclei_Report():
-    print(PHASE +"Vulnerability Scanning Phase" + RESET + "\n")
-    try:
-        subprocess.run(["nuclei" , "-l" , "alive.txt" , "-s" , "low,medium,high,critical" , "-o" , "./NucleiReport.txt"]) 
-    except:
-        print(ERROR + "couldn't find nuclei in" + colorama.Fore.CYAN + " /usr/bin/nuclei" + colorama.Style.RESET_ALL)
+	print(PHASE +"[~] Vulnerability Scanning Phase " + RESET + "\n")
+	try:
+		subprocess.run(["nuclei" , "-l" , "alive.txt" , "-s" , "low,medium,high,critical" , "-o" , "./NucleiReport.txt"])
+	except:
+		print(ERROR + "couldn't find nuclei in" + RESET + IMPORTANT + " /usr/bin/nuclei" + RESET)
+		print(IMPORTANT + "download NUCLEI tool " + ONGOING + "sudo apt install nuclei" + RESET)
+
+# run nuclei for one domain
+def Nuclei_Report(domain):
+	print(PHASE +"[~] Vulnerability scanning phase for " + domain + RESET + "\n")
+	try:
+		subprocess.run(["nuclei" , "-u" , domain , "-s" , "low,medium,high,critical" , "-o" , "./NucleiReport.txt"])
+	except:
+		print(ERROR + "couldn't find nuclei in" + RESET + IMPORTANT + " /usr/bin/nuclei" + RESET)
+		print(IMPORTANT + "download NUCLEI tool " + ONGOING + "sudo apt install nuclei" + RESET)
+
+
+
 
 #----------------------------------------------Nmap automation-------------------------------------------------------
 # runs nmap to scan the open ports of the provided domain and save the results in a file
 def Nmap_Report(Domain):
-    try:
-        print(PHASE + "Service Scanning Phase"+ RESET)
-        print(f"{ONGOING}[+] Starting Nmap for {colorama.Fore.BLUE} {Domain} {colorama.Fore.MAGENTA}\n")
-        os.system(f"nmap -sV -T4 {Domain} -o ./{Domain}/NmapReport.txt")
-        print(RESET)
-    except:
-        print(ERROR + "Nmap could not run"+ RESET)
+	try:
+		print(PHASE + "[~] Service Scanning Phase " + ONGOING + " " + Domain)
+		print(RESET)
+		os.system(f"nmap -sV -T4 {Domain} -o ./{Domain}/NmapReport.txt")
+		print(RESET)
+	
+	except OSError:
+		print(ERROR + "Nmap could not run"+ RESET)
+		print(IMPORTANT + "install nmap: " + ONGOING + "sudo apt install nmap" + RESET)
+		print(IMPORTANT + "then try running it again for " + Domain + RESET)
+	
+	except:
+		print(ERROR + " Error occured while running Nmap " + RESET)
+
+
+
 
 #----------------------------------------------wafw00f Integeration------------------------------------------------------
 # checks if there is web applicatoin firewall (WAF)
 def wafw00f_report(Domain):
-    print(PHASE + "WAF Detection Phase" + RESET)
-    try:
-        os.system(f"wafw00f {Domain} -o ./{Domain}/WAF_Report.txt | grep 'is behind'")
-        print('\n')
-       # subprocess.check_call(["./bin/wafw00f", {Domain}, "-o", f"./{Domain}/WAF_Report.txt"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except:
-        print("couldn't find wafw00f on /bin/")
+	print(PHASE + "[~] WAF Detection Phase " + ONGOING + " " + Domain + RESET)
+	
+	try:
+		os.system(f"wafw00f {Domain} -o ./{Domain}/WAF_Report.txt | grep 'is behind'")
+		print('\n')
+	
+	except OSError:
+		print(ERROR + " couldn't find " + IMPORTANT + " /bin/wafw00f " + RESET)
+		print(IMPORTANT + "install wafw00f then try running it again for " + Domain + RESET)
+	
+	except IndexError:
+		print(ERROR + " ERROR: wafw00f failed to detect WAF " + RESET)
+	
+	finally:
+		print(ERROR + " Error occured while running wafw00f " + RESET)
 
-#----------------------------------------------gobuster Integeration------------------------------------------------------
+
+
+
+#----------------------------------------------Gobuster Integeration------------------------------------------------------
 # fuzz the directories of the provieded domain
 def dirsearch(Domain):
-    print(PHASE + "Directory Bruteforce Phase" + RESET)
-    try:
-        os.system(f"gobuster dir -q --url https://{Domain} --random-agent --wordlist /usr/share/wordlists/dirb/common.txt --output='./{Domain}/Directories.txt'")
-    except:
-        print("Couldn't conduct directory search, make sure you have gobuster and the common wordlist at /usr/share/wordlists/dirb/common.txt ")
+	print(PHASE + "[~] Directory Fuzzing Phase " + IMPORTANT + " " + Domain + RESET)
 
+	try:
+		os.system(f"gobuster dir -q --url https://{Domain} --random-agent --wordlist /usr/share/wordlists/dirb/common.txt --output='./{Domain}/Directories.txt'")
+    
+	except:
+		print("Couldn't conduct directory search, make sure you have gobuster and the common wordlist at /usr/share/wordlists/dirb/common.txt ")
+
+
+
+
+#--------------------------------------------------------------------------------------------------------------------------
 # creates an html file that read all the outputs to be view from place
 def create_Report(subdomain):
-    f= open(f"./{subdomain}/index.html", 'a')
-    content = "<html><head><title>Recon Report</title><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css' rel='stylesheet'><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js'></script><style>section{padding: 20px;}\niframe{color: green;background-color: white;}</style></head><body class='bg-dark text-bg-primary'><section class='row bg-dark text-bg-primary'><h1 class='center'>Report</h1><div class='col' id='nmap'><h1>Port Scan</h1><p class='container'><iframe style='color: green;background-color: white;' src='./NmapReport.txt' width='95%' height='800'></iframe></p></div><div class='col' id='dir'><h1>Busted Directories</h1><p class='container'><iframe style='color: green;background-color: white;' src='./Directories.txt' width='95%' height='800'></iframe></p></div><div class='col' id='waf'><h1>Detected WAF</h1><p class='container'><iframe style='color: green;background-color: white;' src='./WAF_Report.txt' width='95%' height='800'></iframe></p></div></section></body></html>"
-    f.write(content)
-    f.close()
-    
-if __name__ == "__main__":
-    def main():
-        apexDomain = ""
-        print(colorama.Fore.LIGHTGREEN_EX + banner + RESET) # print banner
-        try:
-            subdomains = SecTrails(sys.argv[1])
-            for sub in subdomains:
-                os.system("mkdir " + "./" + sub + "." + sys.argv[1])
-                wafw00f_report(sub + "." +sys.argv[1])
-                wapplayzer_report(sub + "." + sys.argv[1])
-                Nmap_Report(sub + "." + sys.argv[1])
-                dirsearch(sub + "." + sys.argv[1])
-                create_Report(sub + "." + sys.argv[1])
-            Nuclei_Report()
+	try:
+		f= open( subdomain+"/index.html", 'w')
+		content = "<html><head><title>Recon Report</title><link href='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css' rel='stylesheet'><script src='https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js'></script><style>section{padding: 20px;}\niframe{color: green;background-color: white;}</style></head><body class='bg-dark text-bg-primary'><section class='row bg-dark text-bg-primary'><h1 class='center'>" + subdomain + " Report</h1><div class='col' id='nmap'><h2>Port Scan</h2><p class='container'><iframe style='color: green;background-color: white;' src='./NmapReport.txt' width='95%' height='800'></iframe></p></div><div class='col' id='dir'><h2>Busted Directories</h2><p class='container'><iframe style='color: green;background-color: white;' src='./Directories.txt' width='95%' height='800'></iframe></p></div><div class='col' id='waf'><h2>Detected WAF</h2><p class='container'><iframe style='color: green;background-color: white;' src='./WAF_Report.txt' width='95%' height='800'></iframe></p></div></section></body></html>"
+		f.write(content)
+		f.close()
+	except:
+		print(ERROR + " COULD NOT WRITE REPORT FILE " + RESET)
 
-        except:
-            while apexDomain == "":
-                apexDomain= input(INPUT + "Enter Apex Domain: ") 
-            subdomains = SecTrails(apexDomain)
-            for sub in subdomains:
-                os.system("mkdir " + "./" + sub + "." + apexDomain)    # create subdomain folder
-                wafw00f_report(sub + "." + apexDomain)      
-                wapplayzer_report(sub + "." + apexDomain)
-                Nmap_Report(sub + "." + apexDomain)
-                dirsearch(sub + "." + apexDomain)
-                create_Report(sub + "." + apexDomain)
-            Nuclei_Report()            
-    main()
+
+
+#------------------------------------------Main function------------------------------------------------------
+
+
+if __name__ == "__main__":
+
+	print(ONGOING + banner + RESET)
+	print(IMPORTANT + statment + RESET)
+
+	def process(subdomain):
+		os.system("mkdir " + "./" + subdomain)
+		wafw00f_report		(subdomain)
+		wapplayzer_report	(subdomain)
+		Nmap_Report			(subdomain)
+		dirsearch			(subdomain)
+		create_Report		(subdomain)
+
+
+	def main():
+		if len(sys.argv)==2 :
+			subdomains = SecTrails(sys.argv[1])
+			try:
+				for sub in subdomains:
+					process(f"{sub}.{sys.argv[1]}")
+			except IndexError:
+				if len(subdomains)<2:
+					print(ERROR + "could not fetch subdomains" + RESET)
+					print(ONGOING + "[~] running on the main domain only" + RESET)
+					process(sys.argv[1])
+					Nuclei_Report(sys.argv[1])
+					quit()
+				else:
+					print(colorama.Fore.RED + "A non-fatal error occured during running subdomain enumeration" + RESET)
+					for sub in subdomains: 
+						process(f"{sub}.{sys.argv[1]}")
+
+		# take user input if was not provided as an argument
+		else:
+			apexDomain = ""
+			while apexDomain == "":
+				apexDomain= input(INPUT + "Enter Apex Domain: ")
+				print(RESET)
+
+			subdomains = SecTrails(apexDomain)
+
+			for sub in subdomains:
+				process(f"{sub}.{apexDomain}")
+
+	main()
+	Nuclei_Report()
 
 # run plz
+
+#TODO:
+	# must add validators.domain({Apex Domain}) for invalid input at a suitable location
+	# nmap can output in xml format, maybe we could render that in the report in  much more readable way
