@@ -1,3 +1,4 @@
+<img src="https://raw.githubusercontent.com/SecYuri/E3numer/master/logopresentation.jpg" alt="E3nummer logo">
 # E3numer
 ## Installation
 ### make sure you have pip and python3
