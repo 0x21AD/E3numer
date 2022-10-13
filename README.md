@@ -25,5 +25,5 @@ The tool is using security trails and wappalyzer non-commercial api-keys, we str
 
 ### Creators
 https://www.linkedin.com/in/ahmed-mamdouh-b563081b6/ 
-https://www.linkedin.com/in/zeyad-hassan-a973441bb/
+https://www.linkedin.com/in/ziad-hassan-a973441bb/
 
