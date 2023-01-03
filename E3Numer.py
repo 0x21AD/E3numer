@@ -187,6 +187,7 @@ def Nmap_Report(Domain):
 		print(PHASE + "[~] Service Scanning Phase " + ONGOING + " " + Domain)
 		print(RESET)
 		os.system(f"nmap -sV -T4 {Domain} -o ./{Domain}/NmapReport.txt")
+		os.system(f"nmap -sV -T4 {Domain} -oX ./{Domain}/NmapReport.xml")
 		print(RESET)
 	
 	except OSError:
@@ -302,4 +303,4 @@ if __name__ == "__main__":
 
 #TODO:
 	# must add validators.domain({Apex Domain}) for invalid input at a suitable location
-	# nmap can output in xml format, maybe we could render that in the report in  much more readable way
+	# nmap can output in xml format, maybe we could render that in the report in  much more readable way [Done]
