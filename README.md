@@ -49,6 +49,6 @@ The tool is using [security trails](https://securitytrails.com/) and [wappalyzer
 
 ## Creators
 
-https://www.linkedin.com/in/ahmed-mamdouh-b563081b6/
+https://www.linkedin.com/in/deadude/
 
 https://www.linkedin.com/in/ziad-hassan-a973441bb/
